@@ -259,3 +259,90 @@ test.describe("Keyboard Support", () => {
     expect(await getResult(page)).toBe("4");
   });
 });
+
+// ── Settings Panel ──────────────────────────────────────────────────────────
+
+test.describe("Settings Panel", () => {
+  test("opens and closes settings panel", async ({ page }) => {
+    const panel = page.locator("#settings-panel");
+    await expect(panel).not.toHaveClass(/open/);
+
+    await page.locator("#settings-toggle").click();
+    await expect(panel).toHaveClass(/open/);
+
+    await page.locator("#settings-close").click();
+    await expect(panel).not.toHaveClass(/open/);
+  });
+
+  test("changes theme to light, solarized, and back to dark", async ({ page }) => {
+    await page.locator("#settings-toggle").click();
+
+    // Select light
+    await page.locator('.settings-option[data-theme="light"]').click();
+    await expect(page.locator("#calculator")).toHaveAttribute("data-theme", "light");
+    await expect(page.locator("body")).toHaveAttribute("data-theme", "light");
+
+    // Select solarized
+    await page.locator('.settings-option[data-theme="solarized"]').click();
+    await expect(page.locator("#calculator")).toHaveAttribute("data-theme", "solarized");
+    await expect(page.locator("body")).toHaveAttribute("data-theme", "solarized");
+
+    // Back to dark
+    await page.locator('.settings-option[data-theme="dark"]').click();
+    await expect(page.locator("#calculator")).toHaveAttribute("data-theme", "dark");
+  });
+
+  test("applies decimal precision formatting", async ({ page }) => {
+    await page.locator("#settings-toggle").click();
+    await page.locator('.settings-option[data-precision="2"]').click();
+    await page.locator("#settings-close").click();
+
+    // 10 ÷ 4 = 2.50 with precision 2
+    await press(page, "1");
+    await press(page, "0");
+    await press(page, "÷");
+    await press(page, "4");
+    await press(page, "=");
+    expect(await getResult(page)).toBe("2.50");
+  });
+
+  test("applies thousands separator formatting", async ({ page }) => {
+    await page.locator("#settings-toggle").click();
+    await page.locator('label[for="separator-toggle"], .settings-group:has-text("Thousands Separator") .slider').click();
+    await page.locator("#settings-close").click();
+
+    // 5000 + 5000 = 10,000
+    await press(page, "5");
+    await press(page, "0");
+    await press(page, "0");
+    await press(page, "0");
+    await press(page, "+");
+    await press(page, "5");
+    await press(page, "0");
+    await press(page, "0");
+    await press(page, "0");
+    await press(page, "=");
+    expect(await getResult(page)).toBe("10,000");
+  });
+
+  test("disables keyboard typing when settings panel is open", async ({ page }) => {
+    await page.locator("#settings-toggle").click();
+    await expect(page.locator("#settings-panel")).toHaveClass(/open/);
+
+    await page.keyboard.type("12345");
+    expect(await getResult(page)).toBe("0");
+  });
+
+  test("persists settings across page reload", async ({ page }) => {
+    await page.locator("#settings-toggle").click();
+    await page.locator('.settings-option[data-theme="solarized"]').click();
+    await page.locator('.settings-option[data-precision="4"]').click();
+
+    await page.reload();
+
+    await expect(page.locator("#calculator")).toHaveAttribute("data-theme", "solarized");
+    await page.locator("#settings-toggle").click();
+    await expect(page.locator('.settings-option[data-precision="4"]')).toHaveClass(/active/);
+  });
+});
+
