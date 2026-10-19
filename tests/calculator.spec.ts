@@ -308,7 +308,7 @@ test.describe("Settings Panel", () => {
 
   test("applies thousands separator formatting", async ({ page }) => {
     await page.locator("#settings-toggle").click();
-    await page.locator('label[for="separator-toggle"], .settings-group:has-text("Thousands Separator") .slider').click();
+    await page.locator('label.switch[for="separator-toggle"]').click();
     await page.locator("#settings-close").click();
 
     // 5000 + 5000 = 10,000
@@ -343,6 +343,108 @@ test.describe("Settings Panel", () => {
     await expect(page.locator("#calculator")).toHaveAttribute("data-theme", "solarized");
     await page.locator("#settings-toggle").click();
     await expect(page.locator('.settings-option[data-precision="4"]')).toHaveClass(/active/);
+  });
+
+  test("preserves and reformats completed equation after equals when changing precision or separator", async ({ page }) => {
+    // Perform 10 ÷ 4 = 2.5
+    await press(page, "1");
+    await press(page, "0");
+    await press(page, "÷");
+    await press(page, "4");
+    await press(page, "=");
+    expect(await getResult(page)).toBe("2.5");
+    expect(await getExpression(page)).toBe("10 ÷ 4 =");
+
+    // Open settings and change precision to 2
+    await page.locator("#settings-toggle").click();
+    await page.locator('.settings-option[data-precision="2"]').click();
+
+    // Expression must be preserved and reformatted (not erased!)
+    expect(await getExpression(page)).toBe("10.00 ÷ 4.00 =");
+    expect(await getResult(page)).toBe("2.50");
+
+    // Enable separator
+    await page.locator('label.switch[for="separator-toggle"]').click();
+    expect(await getExpression(page)).toBe("10.00 ÷ 4.00 =");
+  });
+
+  test("settings work for current session even when localStorage write fails", async ({ page }) => {
+    await page.evaluate(() => {
+      Storage.prototype.setItem = () => {
+        throw new Error("QuotaExceededError");
+      };
+    });
+
+    await page.locator("#settings-toggle").click();
+    await page.locator('.settings-option[data-theme="solarized"]').click();
+
+    // Theme should still apply in memory
+    await expect(page.locator("#calculator")).toHaveAttribute("data-theme", "solarized");
+  });
+
+  test("closed settings panel is inert and excluded from keyboard navigation", async ({ page }) => {
+    const panel = page.locator("#settings-panel");
+    await expect(panel).toHaveAttribute("inert", "");
+    await expect(panel).toHaveAttribute("aria-hidden", "true");
+    await expect(panel).toHaveCSS("visibility", "hidden");
+
+    // Open panel
+    await page.locator("#settings-toggle").click();
+    await expect(panel).not.toHaveAttribute("inert");
+    await expect(panel).toHaveAttribute("aria-hidden", "false");
+    await expect(panel).toHaveCSS("visibility", "visible");
+
+    // Close panel
+    await page.locator("#settings-close").click();
+    await expect(panel).toHaveAttribute("inert", "");
+    await expect(panel).toHaveCSS("visibility", "hidden");
+  });
+
+  test("checkboxes have accessible names for screen readers", async ({ page }) => {
+    await page.locator("#settings-toggle").click();
+    const separatorBox = page.getByRole("checkbox", { name: /Thousands Separator/i });
+    await expect(separatorBox).toBeAttached();
+
+    const soundBox = page.getByRole("checkbox", { name: /Sound/i });
+    await expect(soundBox).toBeAttached();
+  });
+
+  test("pressing Enter on focused settings toggle does not trigger calculator equals", async ({ page }) => {
+    // Type 5 + 3
+    await press(page, "5");
+    await press(page, "+");
+    await press(page, "3");
+
+    // Focus settings toggle and press Enter
+    await page.locator("#settings-toggle").focus();
+    await page.keyboard.press("Enter");
+
+    // Panel should open and calculation must NOT have evaluated to 8
+    await expect(page.locator("#settings-panel")).toHaveClass(/open/);
+    expect(await getResult(page)).toBe("3");
+    expect(await getExpression(page)).toBe("5 +");
+  });
+
+  test("calculations proceed normally even if Web Audio fails", async ({ page }) => {
+    await page.locator("#settings-toggle").click();
+    await page.locator('label.switch[for="sound-toggle"]').click();
+    await page.locator("#settings-close").click();
+
+    // Mock AudioContext to throw
+    await page.evaluate(() => {
+      window.AudioContext = class {
+        constructor() {
+          throw new Error("Audio blocked");
+        }
+      } as unknown as typeof AudioContext;
+    });
+
+    // Arithmetic should still work without error
+    await press(page, "7");
+    await press(page, "+");
+    await press(page, "2");
+    await press(page, "=");
+    expect(await getResult(page)).toBe("9");
   });
 });
 

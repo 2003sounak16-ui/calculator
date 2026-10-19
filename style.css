@@ -158,14 +158,19 @@ body {
 .settings-panel {
   max-height: 0;
   overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
   background: var(--settings-bg);
   transition: max-height .35s cubic-bezier(.4, 0, .2, 1),
-              padding .35s cubic-bezier(.4, 0, .2, 1);
+              padding .35s cubic-bezier(.4, 0, .2, 1),
+              visibility .35s ease;
   padding: 0 20px;
   border-bottom: 0 solid var(--settings-border);
 }
 .settings-panel.open {
   max-height: 400px;
+  visibility: visible;
+  pointer-events: auto;
   padding: 16px 20px 20px;
   border-bottom-width: 1px;
 }

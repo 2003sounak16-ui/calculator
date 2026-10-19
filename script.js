@@ -19,7 +19,11 @@
   }
 
   function saveSettings() {
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    try {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    } catch {
+      // Storage unavailable or quota exceeded; settings persist in-memory
+    }
   }
 
   let settings = loadSettings();
@@ -29,6 +33,7 @@
   let previousInput = "";
   let operator = null;
   let shouldResetDisplay = false;
+  let completedCalculation = null; // Stores { a, b, op } so expression stays intact on reformat
 
   // ── DOM refs ──
   const calculatorEl = document.getElementById("calculator");
@@ -42,21 +47,30 @@
   const separatorToggle = document.getElementById("separator-toggle");
   const soundToggle = document.getElementById("sound-toggle");
 
-  // ── Audio (Web Audio API – no external files needed) ──
+  // ── Audio (Web Audio API – safe & fault-tolerant) ──
   let audioCtx = null;
 
   function playClickSound() {
     if (!settings.sound) return;
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
-    osc.connect(gain).connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.06);
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      if (!audioCtx) audioCtx = new AudioContextClass();
+      if (audioCtx.state === "suspended") {
+        audioCtx.resume().catch(() => {});
+      }
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.06);
+    } catch {
+      // Web Audio failure must never block calculator operations
+    }
   }
 
   // ── Helpers ──
@@ -105,6 +119,9 @@
     if (operator && previousInput !== "") {
       expressionEl.textContent =
         `${formatNumber(previousInput)} ${OPERATOR_SYMBOLS[operator]}`;
+    } else if (completedCalculation) {
+      expressionEl.textContent =
+        `${formatNumber(completedCalculation.a)} ${OPERATOR_SYMBOLS[completedCalculation.op]} ${formatNumber(completedCalculation.b)} =`;
     } else {
       expressionEl.textContent = "";
     }
@@ -130,6 +147,7 @@
     if (shouldResetDisplay) {
       currentInput = value;
       shouldResetDisplay = false;
+      completedCalculation = null;
     } else {
       currentInput =
         currentInput === "0" ? value : currentInput + value;
@@ -142,6 +160,7 @@
     if (shouldResetDisplay) {
       currentInput = "0.";
       shouldResetDisplay = false;
+      completedCalculation = null;
     } else if (!currentInput.includes(".")) {
       currentInput += ".";
     }
@@ -150,6 +169,7 @@
 
   function handleOperator(nextOp) {
     playClickSound();
+    completedCalculation = null;
     if (operator && !shouldResetDisplay) {
       // Chain operations
       const result = calculate(previousInput, currentInput, operator);
@@ -165,13 +185,17 @@
   function handleEquals() {
     playClickSound();
     if (!operator) return;
+    completedCalculation = {
+      a: previousInput,
+      b: currentInput,
+      op: operator,
+    };
     const result = calculate(previousInput, currentInput, operator);
-    expressionEl.textContent =
-      `${formatNumber(previousInput)} ${OPERATOR_SYMBOLS[operator]} ${formatNumber(currentInput)} =`;
     currentInput = result.toString();
     previousInput = "";
     operator = null;
     shouldResetDisplay = true;
+    updateExpression();
     updateDisplay();
   }
 
@@ -180,6 +204,7 @@
     currentInput = "0";
     previousInput = "";
     operator = null;
+    completedCalculation = null;
     shouldResetDisplay = false;
     updateDisplay();
     updateExpression();
@@ -224,7 +249,16 @@
   }
 
   function toggleSettingsPanel() {
-    settingsPanel.classList.toggle("open");
+    const isOpen = settingsPanel.classList.toggle("open");
+    if (isOpen) {
+      settingsPanel.removeAttribute("inert");
+      settingsPanel.setAttribute("aria-hidden", "false");
+      settingsToggle.setAttribute("aria-expanded", "true");
+    } else {
+      settingsPanel.setAttribute("inert", "");
+      settingsPanel.setAttribute("aria-hidden", "true");
+      settingsToggle.setAttribute("aria-expanded", "false");
+    }
   }
 
   // Settings toggle & close
@@ -292,8 +326,9 @@
 
   // ── Keyboard support ──
   document.addEventListener("keydown", (e) => {
-    // Don't handle keys while settings panel is open
+    // Exclude settings controls and open panel from calculator shortcuts
     if (settingsPanel.classList.contains("open")) return;
+    if (e.target && e.target.closest && e.target.closest("#settings-panel, #settings-toggle")) return;
 
     const key = e.key;
     if (key >= "0" && key <= "9")   handleNumber(key);
@@ -305,6 +340,7 @@
     else if (key === "Enter" || key === "=") handleEquals();
     else if (key === "Escape")      handleClear();
     else if (key === "Backspace") {
+      e.preventDefault();
       if (currentInput.length > 1) {
         currentInput = currentInput.slice(0, -1);
       } else {
