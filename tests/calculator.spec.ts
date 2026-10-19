@@ -398,6 +398,7 @@ test.describe("Settings Panel", () => {
     await page.locator("#settings-close").click();
     await expect(panel).toHaveAttribute("inert", "");
     await expect(panel).toHaveCSS("visibility", "hidden");
+    await expect(page.locator("#settings-toggle")).toBeFocused();
   });
 
   test("checkboxes have accessible names for screen readers", async ({ page }) => {
@@ -425,19 +426,33 @@ test.describe("Settings Panel", () => {
     expect(await getExpression(page)).toBe("5 +");
   });
 
-  test("calculations proceed normally even if Web Audio fails", async ({ page }) => {
+  test("keyboard shortcuts work after closing settings with the gear", async ({ page }) => {
     await page.locator("#settings-toggle").click();
-    await page.locator('label.switch[for="sound-toggle"]').click();
-    await page.locator("#settings-close").click();
+    await page.locator("#settings-toggle").click();
 
-    // Mock AudioContext to throw
+    await page.keyboard.type("123");
+    expect(await getResult(page)).toBe("123");
+
+    await page.keyboard.press("Backspace");
+    expect(await getResult(page)).toBe("12");
+  });
+
+  test("calculations proceed normally even if Web Audio fails", async ({ page }) => {
+    // Install the failing mock before enabling sound, which creates the context.
     await page.evaluate(() => {
+      (window as any).__audioContextConstructorCalls = 0;
       window.AudioContext = class {
         constructor() {
+          (window as any).__audioContextConstructorCalls++;
           throw new Error("Audio blocked");
         }
       } as unknown as typeof AudioContext;
     });
+
+    await page.locator("#settings-toggle").click();
+    await page.locator('label.switch[for="sound-toggle"]').click();
+    expect(await page.evaluate(() => (window as any).__audioContextConstructorCalls)).toBe(1);
+    await page.locator("#settings-close").click();
 
     // Arithmetic should still work without error
     await press(page, "7");

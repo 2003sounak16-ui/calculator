@@ -258,6 +258,7 @@
       settingsPanel.setAttribute("inert", "");
       settingsPanel.setAttribute("aria-hidden", "true");
       settingsToggle.setAttribute("aria-expanded", "false");
+      settingsToggle.focus();
     }
   }
 
@@ -326,9 +327,12 @@
 
   // ── Keyboard support ──
   document.addEventListener("keydown", (e) => {
-    // Exclude settings controls and open panel from calculator shortcuts
+    // Ignore calculator shortcuts while the panel is open or a settings
+    // control has focus. The gear only consumes its activation keys so
+    // calculator shortcuts still work after it closes the panel.
     if (settingsPanel.classList.contains("open")) return;
-    if (e.target && e.target.closest && e.target.closest("#settings-panel, #settings-toggle")) return;
+    if (e.target && e.target.closest && e.target.closest("#settings-panel")) return;
+    if (e.target && e.target.closest && e.target.closest("#settings-toggle") && (e.key === "Enter" || e.key === " ")) return;
 
     const key = e.key;
     if (key >= "0" && key <= "9")   handleNumber(key);
