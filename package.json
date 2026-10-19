@@ -1,0 +1,27 @@
+{
+  "name": "calculator",
+  "version": "1.0.0",
+  "description": "A clean, modern calculator web app with a dark theme.",
+  "main": "script.js",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:headed": "npx playwright test --headed",
+    "test:report": "npx playwright show-report"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/2003sounak16-ui/calculator.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/2003sounak16-ui/calculator/issues"
+  },
+  "homepage": "https://github.com/2003sounak16-ui/calculator#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "serve": "^14.2.6"
+  }
+}
