@@ -9,16 +9,16 @@
 <body>
   <div class="calculator" id="calculator">
     <div class="display">
-      <button class="settings-toggle" id="settings-toggle" aria-label="Settings">⚙</button>
+      <button class="settings-toggle" id="settings-toggle" aria-label="Settings" aria-expanded="false" aria-controls="settings-panel">⚙</button>
       <div class="expression" id="expression"></div>
       <div class="result" id="result">0</div>
     </div>
 
     <!-- Settings Panel -->
-    <div class="settings-panel" id="settings-panel">
+    <div class="settings-panel" id="settings-panel" inert aria-hidden="true">
       <div class="settings-header">
         <span>Settings</span>
-        <button class="settings-close" id="settings-close">✕</button>
+        <button class="settings-close" id="settings-close" aria-label="Close settings">✕</button>
       </div>
 
       <div class="settings-group">
@@ -41,22 +41,22 @@
       </div>
 
       <div class="settings-group">
-        <label class="settings-label">Thousands Separator</label>
+        <label class="settings-label" id="separator-label" for="separator-toggle">Thousands Separator</label>
         <div class="settings-toggle-row">
           <span class="settings-desc">1,000,000</span>
-          <label class="switch">
-            <input type="checkbox" id="separator-toggle" />
+          <label class="switch" for="separator-toggle">
+            <input type="checkbox" id="separator-toggle" aria-labelledby="separator-label" />
             <span class="slider"></span>
           </label>
         </div>
       </div>
 
       <div class="settings-group">
-        <label class="settings-label">Sound</label>
+        <label class="settings-label" id="sound-label" for="sound-toggle">Sound</label>
         <div class="settings-toggle-row">
           <span class="settings-desc">Button click sound</span>
-          <label class="switch">
-            <input type="checkbox" id="sound-toggle" />
+          <label class="switch" for="sound-toggle">
+            <input type="checkbox" id="sound-toggle" aria-labelledby="sound-label" />
             <span class="slider"></span>
           </label>
         </div>

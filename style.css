@@ -158,6 +158,7 @@ body {
 .settings-panel {
   max-height: 0;
   overflow: hidden;
+  visibility: hidden;
   background: var(--settings-bg);
   transition: max-height .35s cubic-bezier(.4, 0, .2, 1),
               padding .35s cubic-bezier(.4, 0, .2, 1);
@@ -166,6 +167,7 @@ body {
 }
 .settings-panel.open {
   max-height: 400px;
+  visibility: visible;
   padding: 16px 20px 20px;
   border-bottom-width: 1px;
 }
