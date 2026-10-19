@@ -31,6 +31,17 @@ To run the calculator locally in your browser:
 npx serve . -l 3000
 ```
 
+## Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| `0-9` | Input digits |
+| `.` | Decimal point |
+| `+ - * /` | Operators |
+| `Enter` or `=` | Evaluate |
+| `Escape` | Clear (AC) |
+| `Backspace` | Delete last digit |
+
 ## Running Tests with Playwright
 
 Playwright is configured to run across **Chromium**, **Firefox**, and **WebKit**.
