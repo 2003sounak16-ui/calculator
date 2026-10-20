@@ -2,8 +2,9 @@
   "name": "calculator",
   "version": "1.0.0",
   "description": "A clean, modern calculator web app with a dark theme.",
-  "main": "script.js",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "test": "npx playwright test",
     "test:headed": "npx playwright test --headed",
     "test:report": "npx playwright show-report"
