@@ -64,3 +64,52 @@ The repository includes a GitHub Actions workflow (`.github/workflows/playwright
 - Executes tests in parallel across desktop browsers.
 - Integrates with the **Playwright GitHub Reporter** to provide automated line-by-line annotations and reviews on PR diffs.
 - Automatically archives and uploads the Playwright HTML test reports and traces as artifacts for review.
+
+
+## Apache Maven & GitHub Packages
+
+This repository is published to the **GitHub Packages Apache Maven Registry**.
+
+### Maven Coordinates
+
+```xml
+<dependency>
+  <groupId>com.github.2003sounak16-ui</groupId>
+  <artifactId>calculator</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+</dependency>
+```
+
+### Authenticating & Installing
+
+To consume packages from GitHub Packages in another Maven project:
+
+1. **Configure your `~/.m2/settings.xml`**:
+   ```xml
+   <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+     <servers>
+       <server>
+         <id>github</id>
+         <username>YOUR_GITHUB_USERNAME</username>
+         <password>YOUR_PERSONAL_ACCESS_TOKEN</password>
+       </server>
+     </servers>
+   </settings>
+   ```
+   *(Ensure your Personal Access Token (classic) has at least `read:packages` scope).*
+
+2. **Add Repository to your project's `pom.xml`**:
+   ```xml
+   <repositories>
+     <repository>
+       <id>github</id>
+       <name>GitHub 2003sounak16-ui Packages</name>
+       <url>https://maven.pkg.github.com/2003sounak16-ui/calculator</url>
+       <snapshots>
+         <enabled>true</enabled>
+       </snapshots>
+     </repository>
+   </repositories>
+   ```
