@@ -39,8 +39,8 @@
                 <targetPath>META-INF/resources</targetPath>
                 <includes>
                     <include>index.html</include>
-                    <include>style.css</include>
-                    <include>script.js</include>
+                    <include>css/**</include>
+                    <include>js/**</include>
                 </includes>
             </resource>
         </resources>
