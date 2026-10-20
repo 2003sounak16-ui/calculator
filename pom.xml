@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.github.2003sounak16-ui</groupId>
+    <artifactId>calculator</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>calculator</name>
+    <description>A clean, modern calculator web app packaged for Apache Maven and GitHub Packages</description>
+    <url>https://github.com/2003sounak16-ui/calculator</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+    </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub 2003sounak16-ui Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/2003sounak16-ui/calculator</url>
+        </repository>
+        <snapshotRepository>
+            <id>github</id>
+            <name>GitHub 2003sounak16-ui Apache Maven Snapshots</name>
+            <url>https://maven.pkg.github.com/2003sounak16-ui/calculator</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}</directory>
+                <targetPath>META-INF/resources</targetPath>
+                <includes>
+                    <include>index.html</include>
+                    <include>style.css</include>
+                    <include>script.js</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.1.1</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,33 @@
+name: Publish to GitHub Packages Apache Maven Registry
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'pom.xml'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    name: Build and Deploy Maven Package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          server-id: 'github'
+          settings-path: ${{ github.workspace }}
+
+      - name: Publish to GitHub Packages
+        run: mvn --batch-mode deploy -s ${{ github.workspace }}/settings.xml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
