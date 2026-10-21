@@ -1,5 +1,11 @@
 # Calculator
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-hisabnikash.getvoroa.com-brightgreen?style=for-the-badge&logo=google-chrome&logoColor=white)](https://hisabnikash.getvoroa.com)
+[![GitHub Pages](https://img.shields.io/badge/Mirror-GitHub%20Pages-blue?style=for-the-badge&logo=github)](https://2003sounak16-ui.github.io/calculator/)
+
+> 🌐 **Live URL**: [https://hisabnikash.getvoroa.com](https://hisabnikash.getvoroa.com)  
+> 🔗 **Mirror**: [https://2003sounak16-ui.github.io/calculator/](https://2003sounak16-ui.github.io/calculator/)
+
 A clean, modern calculator web application featuring a responsive UI, dark/light/solarized themes, customizable decimal precision, optional thousands separators, and sound effects.
 
 ## Features
@@ -20,14 +26,19 @@ A clean, modern calculator web application featuring a responsive UI, dark/light
 
 - HTML5 & CSS3 (CSS Custom Properties & Grid)
 - Vanilla JavaScript (ES6+)
+- Node.js & Java HttpServer runtimes for deployment
 - Playwright for End-to-End Testing
-- GitHub Actions for Continuous Integration (CI) and automated PR reviews
+- Apache Maven & GitHub Packages publishing
+- GitHub Actions for Continuous Integration (CI)
 
 ## Getting Started
 
 To run the calculator locally in your browser:
 ```bash
-# Open directly or use any static file server:
+# Open directly or use the built-in server:
+npm start
+
+# Or with any static file server:
 npx serve . -l 3000
 ```
 

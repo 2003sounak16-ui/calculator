@@ -20,7 +20,7 @@
   "bugs": {
     "url": "https://github.com/2003sounak16-ui/calculator/issues"
   },
-  "homepage": "https://github.com/2003sounak16-ui/calculator#readme",
+  "homepage": "https://hisabnikash.getvoroa.com",
   "devDependencies": {
     "@playwright/test": "^1.64.1",
     "serve": "^14.2.6"
